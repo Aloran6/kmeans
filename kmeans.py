@@ -39,6 +39,7 @@ class KMeans():
             # you code
             for i in range(self.n_clusters):
                 centroids_list.append(r.randint(0,len(X)))
+            print(centroids_list)
 
             print(X)
         elif self.init == 'kmeans++':
