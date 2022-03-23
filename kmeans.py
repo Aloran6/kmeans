@@ -1,5 +1,6 @@
 import numpy as np
 import random as r
+import math
 
 class KMeans():
 
@@ -25,6 +26,7 @@ class KMeans():
         return clustering
 
     def update_centroids(self, clustering: np.ndarray, X: np.ndarray):
+
         pass
         #your code
 
@@ -57,6 +59,7 @@ class KMeans():
         :return: Returns a matrix `dist` where `dist_ij` is the distance between row i in X1 and row j in X2.
         """
         # your code
+        dist = np.linalg.norm(X1 - X2)
         pass
 
     def silhouette(self, clustering: np.ndarray, X: np.ndarray):
