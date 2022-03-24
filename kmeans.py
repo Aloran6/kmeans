@@ -1,3 +1,4 @@
+from turtle import update
 import numpy as np
 import random as r
 import math
@@ -21,12 +22,19 @@ class KMeans():
         iteration = 0
         clustering = np.zeros(X.shape[0])
         while iteration < self.max_iter:
-            pass
+            dist_matrix = self.euclidean_distance(X,self.centroids)
+            clustering = dist_matrix.argmin(axis = 1)
+            self.update_centroids(clustering, X)
+            iteration+=1
             # your code
         return clustering
 
     def update_centroids(self, clustering: np.ndarray, X: np.ndarray):
-
+        new = []
+        for c in range(self.n_clusters):
+            new.append(np.mean([X[i] for i in range(len(X)) if clustering[i] == c], axis = 0))
+        new = np.array(new)
+        print(new)
         pass
         #your code
 
@@ -39,11 +47,11 @@ class KMeans():
         centroids_list = []
         if self.init == 'random':
             # you code
-            for i in range(self.n_clusters):
-                centroids_list.append(r.randint(0,len(X)))
-            print(centroids_list)
+            centroids_list = X[np.random.randint(X.shape[0],size = self.n_clusters)]
+            self.centroids = np.array(centroids_list)
+            #print(self.centroids)
+            #print(X)
 
-            print(X)
         elif self.init == 'kmeans++':
             # your code
             print(X)
@@ -59,8 +67,16 @@ class KMeans():
         :return: Returns a matrix `dist` where `dist_ij` is the distance between row i in X1 and row j in X2.
         """
         # your code
-        dist = np.linalg.norm(X1 - X2)
-        pass
+        #X1 = data, X2 = centroids
+        dist = []
+        for i in range(self.n_clusters):
+            squared = np.square(X1 - X2[i])
+            sum_squred = np.sum(squared, axis = 1)
+            d = np.sqrt(sum_squred)
+            dist.append(d)
+        dist = np.array(dist)
+        dist = np.transpose(dist)
+        return dist
 
     def silhouette(self, clustering: np.ndarray, X: np.ndarray):
         # your code

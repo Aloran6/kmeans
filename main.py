@@ -1,3 +1,4 @@
+from distutils.file_util import write_file
 import anndata
 import scanpy as sc
 import numpy as np
@@ -45,7 +46,9 @@ def main():
     heart = read_data('data.csv')
     heart = preprocess_data(heart)
     X = PCA(heart.X, 100)
-    print(X)
+    
+    temp = KMeans(3,'random',30)
+    print(temp.fit(X))
     # Your code
 
 def visualize_cluster(x, y, clustering):
