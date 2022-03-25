@@ -18,25 +18,29 @@ class KMeans():
         self.centroids = None # Initialized in initialize_centroids()
 
     def fit(self, X: np.ndarray):
-        self.initialize_centroids(X)
+        self.initialize_centroids(X) #get the initial centroids
         iteration = 0
-        clustering = np.zeros(X.shape[0])
+        clustering = np.zeros(X.shape[0]) #create the array for storing clusterings
         while iteration < self.max_iter:
-            dist_matrix = self.euclidean_distance(X,self.centroids)
-            clustering = dist_matrix.argmin(axis = 1)
-            self.update_centroids(clustering, X)
+            dist_matrix = self.euclidean_distance(X,self.centroids) #compute all distances between the objects and all centroids
+            clustering = dist_matrix.argmin(axis = 1) #the minimum of the distance is the clustering number
+            if self.update_centroids(clustering, X): #update centroid will return TRUE if previous iteration had the same exact centroids as the current one, 
+                #meaning the clustering won't change anymore, we can break and return the clusterings
+                break
             iteration+=1
-            # your code
         return clustering
 
     def update_centroids(self, clustering: np.ndarray, X: np.ndarray):
         new = []
         for c in range(self.n_clusters):
-            new.append(np.mean([X[i] for i in range(len(X)) if clustering[i] == c], axis = 0))
+            mean = np.mean([X[i] for i in range(len(X)) if clustering[i] == c], axis = 0) #get the mean value of all belongs to the same centroid
+            new.append(mean)
         new = np.array(new)
-        print(new)
-        pass
-        #your code
+        if np.array_equal(self.centroids, new): #if there was no change between this iteration and the last, we have found our final clustering choice
+            return True
+        else:
+            self.centroids = new.copy()
+            return False
 
     def initialize_centroids(self, X: np.ndarray):
         """
@@ -47,14 +51,23 @@ class KMeans():
         centroids_list = []
         if self.init == 'random':
             # you code
-            centroids_list = X[np.random.randint(X.shape[0],size = self.n_clusters)]
+            centroids_list = X[np.random.randint(X.shape[0],size = self.n_clusters)] #pick n_cluster amount of centroids randomly
             self.centroids = np.array(centroids_list)
             #print(self.centroids)
             #print(X)
 
         elif self.init == 'kmeans++':
             # your code
-            print(X)
+            self.centroids = X[r.randint(0,len(X)-1)]
+            for i in range(self.n_clusters-1):
+                dist_matrix = self.euclidean_distance(X,self.centroids) #get all the distances from centroids
+                min_dist = np.amin(dist_matrix,axis = 1) #distance between points and their closest centroid
+                sum_dist = np.sum(min_dist) #add all of the min numbers
+                
+                prob = min_dist/sum_dist
+                choose = np.random.choice(len(X),size = 1, p=prob) #choose 1 index based on the probability   
+                self.centroids = np.vstack([self.centroids, X[choose]]) #add the chosen row into our centroids list
+                
         else:
             raise ValueError('Centroid initialization method should either be "random" or "k-means++"')
 
@@ -69,7 +82,7 @@ class KMeans():
         # your code
         #X1 = data, X2 = centroids
         dist = []
-        for i in range(self.n_clusters):
+        for i in range(len(self.centroids)): 
             squared = np.square(X1 - X2[i])
             sum_squred = np.sum(squared, axis = 1)
             d = np.sqrt(sum_squred)
@@ -79,5 +92,18 @@ class KMeans():
         return dist
 
     def silhouette(self, clustering: np.ndarray, X: np.ndarray):
-        # your code
-        pass
+        tot = [0]*self.n_clusters
+        dist_matrix = self.euclidean_distance(X,self.centroids)
+        unique, counts = np.unique(clustering,return_counts=True)
+        counts_dict = dict(zip(unique, counts))
+        for i in range(len(X)):
+            #ao = dist_matrix[dist_matrix.argmin(axis = 1)]
+            ao = np.partition(dist_matrix[i],0)[0] #distance of object to its centroid
+            bo = np.partition(dist_matrix[i],1)[1] #distance to the second best centroid
+            so = (bo-ao)/max(ao,bo)
+
+            #print(ao, bo, so)
+            tot[clustering[i]] += so/counts_dict[clustering[i]]
+        #print(dist_matrix)
+        tot = np.array(tot)
+        return tot

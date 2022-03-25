@@ -16,7 +16,7 @@ def parse_args():
                         help='data path')
 
     a = parser.parse_args()
-    return(a.n_classifiers, a.data)
+    return(a.n_clusters, a.data)
 
 def read_data(data_path):
     return anndata.read_csv(data_path)
@@ -41,19 +41,50 @@ def PCA(X, num_components: int):
     return pca(num_components).fit_transform(X)
 
 def main():
-    #n_classifiers, data_path = parse_args()
-    #heart = read_data(data_path)
-    heart = read_data('data.csv')
+    n_classifiers, data_path = parse_args()
+    heart = read_data(data_path)
+    #heart = read_data('data.csv')
     heart = preprocess_data(heart)
     X = PCA(heart.X, 100)
+    #ran = KMeans(n_classifiers,'random',300)
+    #kmeanspp = KMeans(n_classifiers,'kmeans++',300)
+
+    save = []
+    fig = plt.figure(1)
+    for i in range(2,10):
+        temp = KMeans(i,'random',300)
+        clustering = temp.fit(X)
+        t = temp.silhouette(clustering,X)
+        save.append(sum(t)/len(t))
+        print(i, save[-1])
+        X = PCA(heart.X, 2)
+        a = fig.add_subplot(4,2,i-1)
+        a.title.set_text('n_clusters = %s'%(i))
+        visualize_cluster(X[:,0],X[:,1],clustering)
+    plt.show()
+
+    x = [2,3,4,5,6,7,8,9]
+    silhouette_plot(x,save,"Average Silhouette Coefficient Score of Clusterings (RANDOM)")
+    #silhouette_plot(x,save,"Average Silhouette Coefficient Score of Clusterings (KMeans++)")
+   
+  
+#used for plotting the average silhouette coefficient of clusterings
+def silhouette_plot(x,y,title):
+    plt.title(title)
+    plt.ylabel("Silhouette Coefficient")
+    plt.xlabel("Number of Clusters")
+    plt.plot(x,y,'bo--')
+    plt.show()
     
-    temp = KMeans(3,'random',30)
-    print(temp.fit(X))
-    # Your code
 
 def visualize_cluster(x, y, clustering):
-    #Your code
-    pass
+
+    num = len(np.unique(clustering))
+    coloring = (255//num)*clustering
+    
+    plt.scatter(x,y, c = coloring)
+    
+   
 
 if __name__ == '__main__':
     main()
