@@ -7,6 +7,8 @@ import argparse
 from kmeans import KMeans
 import matplotlib.pyplot as plt
 
+#HELLO SIR
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Run random forrest with specified input arguments')
     parser.add_argument('--n-clusters', type=int,
